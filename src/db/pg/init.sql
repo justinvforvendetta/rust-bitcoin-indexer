@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS indexer_state (
 -- you can follow them one by one,
 -- to follow blockchain state
 -- canceling protocol is used
--- https://github.com/dpc/rust-bitcoin-indexer/wiki/How-to-interact-with-a-blockchain#canceling-protocol
+-- https://github.com/dpc/rust-verge-indexer/wiki/How-to-interact-with-a-blockchain#canceling-protocol
 CREATE TABLE IF NOT EXISTS event (
   indexed_ts TIMESTAMP NOT NULL DEFAULT (timezone('utc', now())),
   id BIGSERIAL NOT NULL UNIQUE PRIMARY KEY,

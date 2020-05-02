@@ -1,4 +1,4 @@
-pub use bitcoin_hashes::{hex::FromHex as _, Hash as _};
+pub use verge_hashes::{hex::FromHex as _, Hash as _};
 
 /// Data in a block
 ///
@@ -26,10 +26,10 @@ pub struct BlockHeightAndHash {
     pub hash: BlockHash,
 }
 
-/// Block data from BitcoinCore (`rust-bitcoin`)
-pub type BlockData = WithHeightAndId<BlockHash, Box<bitcoin::Block>>;
+/// Block data from VergeCore (`rust-verge`)
+pub type BlockData = WithHeightAndId<BlockHash, Box<verge::Block>>;
 
-pub use bitcoin_hashes::{hash160::Hash as Hash160, sha256d::Hash as Sha256dHash};
+pub use verge_hashes::{hash160::Hash as Hash160, sha256d::Hash as Sha256dHash};
 pub type BlockHex = String;
 pub type TxHex = String;
 pub type TxHash = Sha256dHash;

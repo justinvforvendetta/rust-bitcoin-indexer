@@ -39,7 +39,7 @@ pub trait Rpc: Send + Sync {
 #[derive(Clone, Debug)]
 pub struct RpcInfo {
     pub url: String,
-    pub auth: bitcoincore_rpc::Auth,
+    pub auth: vergecore_rpc::Auth,
 }
 
 impl RpcInfo {
@@ -47,9 +47,9 @@ impl RpcInfo {
         let mut url = url::Url::parse(url_str)?;
         let auth = match (url.username() == "", url.password()) {
             (false, Some(p)) => {
-                bitcoincore_rpc::Auth::UserPass(url.username().to_owned(), p.to_owned())
+                vergecore_rpc::Auth::UserPass(url.username().to_owned(), p.to_owned())
             }
-            (true, None) => bitcoincore_rpc::Auth::None,
+            (true, None) => vergecore_rpc::Auth::None,
             _ => bail!("Incorrect node auth parameters"),
         };
         url.set_password(None).expect("url lib sane");
@@ -60,8 +60,8 @@ impl RpcInfo {
             auth,
         })
     }
-    pub fn to_rpc_client(&self) -> Result<bitcoincore_rpc::Client> {
-        Ok(bitcoincore_rpc::Client::new(
+    pub fn to_rpc_client(&self) -> Result<vergecore_rpc::Client> {
+        Ok(vergecore_rpc::Client::new(
             self.url.clone(),
             self.auth.clone(),
         )?)

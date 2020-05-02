@@ -1,10 +1,10 @@
-use bitcoin;
-use bitcoin_indexer::{
+use verge;
+use verge_indexer::{
     db::{self, MempoolStore},
     prelude::*,
     types::WithId,
 };
-use bitcoincore_rpc::RpcApi;
+use vergecore_rpc::RpcApi;
 use std::{collections::HashSet, env};
 use log::trace;
 
@@ -16,11 +16,11 @@ fn run() -> Result<()> {
     let db_url = env::var("DATABASE_URL")?;
     let node_url = env::var("NODE_RPC_URL")?;
 
-    let rpc_info = bitcoin_indexer::RpcInfo::from_url(&node_url)?;
+    let rpc_info = verge_indexer::RpcInfo::from_url(&node_url)?;
 
     let rpc = rpc_info.to_rpc_client()?;
     let network =
-        bitcoin_indexer::util::bitcoin::network_from_str(&rpc.get_blockchain_info()?.chain)?;
+        verge_indexer::util::verge::network_from_str(&rpc.get_blockchain_info()?.chain)?;
     trace!("Creating mempool store");
     let mut db = db::pg::MempoolStore::new(db_url, network)?;
 
@@ -40,7 +40,7 @@ fn run() -> Result<()> {
                 continue;
             }
 
-            let tx: Option<bitcoin::Transaction> = rpc.get_by_id(&tx_id).ok();
+            let tx: Option<verge::Transaction> = rpc.get_by_id(&tx_id).ok();
             trace!("Inserting mempool tx {}", tx_id);
             match db.insert(&WithId {
                 id: tx_id,

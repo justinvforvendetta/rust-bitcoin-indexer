@@ -1,32 +1,32 @@
 use crate::{types::*, Hash160};
-use bitcoin::util::address;
+use verge::util::address;
 use common_failures::prelude::*;
 use failure::bail;
 
-pub fn network_from_str(s: &str) -> Result<bitcoin::Network> {
+pub fn network_from_str(s: &str) -> Result<verge::Network> {
     Ok(match s {
-        "main" => bitcoin::Network::Bitcoin,
-        "test" => bitcoin::Network::Testnet,
-        "regtest" => bitcoin::Network::Regtest,
-        _ => bail!("Unknown bitcoin chain {}", s),
+        "main" => verge::Network::Verge,
+        "test" => verge::Network::Testnet,
+        "regtest" => verge::Network::Regtest,
+        _ => bail!("Unknown or Incorrect Verge chain {}", s),
     })
 }
 
 fn bech_network(
-    network: bitcoin::network::constants::Network,
-) -> bitcoin_bech32::constants::Network {
-    use bitcoin::network::constants::Network;
+    network: verge::network::constants::Network,
+) -> verge_bech32::constants::Network {
+    use verge::network::constants::Network;
     match network {
-        Network::Bitcoin => bitcoin_bech32::constants::Network::Bitcoin,
-        Network::Testnet => bitcoin_bech32::constants::Network::Testnet,
-        Network::Regtest => bitcoin_bech32::constants::Network::Regtest,
+        Network::Verge => verge_bech32::constants::Network::Verge,
+        Network::Testnet => verge_bech32::constants::Network::Testnet,
+        Network::Regtest => verge_bech32::constants::Network::Regtest,
     }
 }
 
 /// Retrieve an address from the given script.
 pub fn address_from_script(
-    script: &bitcoin::blockdata::script::Script,
-    network: bitcoin::network::constants::Network,
+    script: &verge::blockdata::script::Script,
+    network: verge::network::constants::Network,
 ) -> Option<address::Address> {
     Some(address::Address {
         payload: if script.is_p2sh() {
@@ -42,8 +42,8 @@ pub fn address_from_script(
             return None;
         } else if script.is_v0_p2wsh() {
             address::Payload::WitnessProgram(
-                bitcoin_bech32::WitnessProgram::new(
-                    bitcoin_bech32::u5::try_from_u8(0).expect("0<32"),
+                verge_bech32::WitnessProgram::new(
+                    verge_bech32::u5::try_from_u8(0).expect("0<32"),
                     script.as_bytes()[2..34].to_vec(),
                     bech_network(network),
                 )
@@ -51,8 +51,8 @@ pub fn address_from_script(
             )
         } else if script.is_v0_p2wpkh() {
             address::Payload::WitnessProgram(
-                bitcoin_bech32::WitnessProgram::new(
-                    bitcoin_bech32::u5::try_from_u8(0).expect("0<32"),
+                verge_bech32::WitnessProgram::new(
+                    verge_bech32::u5::try_from_u8(0).expect("0<32"),
                     script.as_bytes()[2..22].to_vec(),
                     bech_network(network),
                 )

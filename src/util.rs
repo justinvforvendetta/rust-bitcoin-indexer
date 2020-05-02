@@ -1,4 +1,4 @@
-pub mod bitcoin;
+pub mod verge;
 
 use log::info;
 use std::time::{Duration, Instant};

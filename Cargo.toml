@@ -1,26 +1,26 @@
 [package]
 authors = ["Dawid Ciężarkiewicz <dpc@dpc.pw>"]
 edition = "2018"
-name = "bitcoin-indexer"
+name = "rust-verge-indexer"
 version = "0.1.0"
-description = "Powerful & Versatile Bitcoin Indexer"
-keywords = ["bitcoin", "indexer", "database", "cryptocurrency"]
+description = "Powerful & Versatile Verge Indexer"
+keywords = ["verge", "indexer", "database", "cryptocurrency"]
 categories = []
 license = "MPL-2.0/MIT/Apache-2.0"
-documentation = "https://docs.rs/bitcoin-indexer"
-homepage = "https://github.com/rust-bitcoin-indexer/bitcoin-indexer"
-repository = "https://github.com/rust-bitcoin-indexer/bitcoin-indexer"
+documentation = "https://docs.rs/verge-indexer"
+homepage = "https://github.com/justinvforvendetta/rust-verge-indexer"
+repository = "https://github.com/justinvforvendeta/rust-verge-indexer"
 readme = "README.md"
 
 [[bench]]
 harness = false
-name = "bitcoincore_rpc"
+name = "rust-vergecore_rpc"
 
 [dependencies]
-bitcoin = "0.18"
+verge = "6.0.2"
 bitcoin-bech32 = "*"
 bitcoin_hashes = "0.3"
-bitcoincore-rpc = { version = "0.6", branch = "more-calls", git="https://github.com/dpc/rust-bitcoincore-rpc" }
+rust-vergecore-rpc = { version = "0.6", branch = "more-calls", git="https://github.com/justinvforvendetta/rust-vergecore-rpc" }
 common_failures = "*"
 failure = "*"
 hex = "0.3"

@@ -1,6 +1,6 @@
-# Bitcoin Indexer
+# Verge Indexer
 
-An experiment in creating a perfect Bitcoin Indexer, in Rust.
+An experiment in creating a perfect Verge Indexer, in Rust.
 
 Query blocks using JsonRPC, dump them into Postgres in an append-only format,
 suitable for querying, as much as event-sourcing-like handling. After reaching
@@ -20,7 +20,7 @@ Goals:
     * always-coherent state view (i.e. atomic reorgs)
 * top-notch performance, especially during initial indexing
 
-Read [How to interact with a blockchain](https://dpc.pw/rust-bitcoin-indexer-how-to-interact-with-a-blockchain) for knowledge sharing, discoveries and design-decisions.
+Read [How to interact with a blockchain](https://dpc.pw/rust-verge-indexer-how-to-interact-with-a-blockchain) for knowledge sharing, discoveries and design-decisions.
 
 Status:
 
@@ -35,24 +35,24 @@ Please take with a grain of salt, and submit PRs if any information is stale or 
 
 ### vs [electrs](https://github.com/romanz/electrs)
 
-Electrs uses an embedded key value store (RocksDB), while rust-bitcoin-indexer uses a normal relational data model in a Postgres that can run on a different host/cluster.
+Electrs uses an embedded key value store (RocksDB), while rust-verge-indexer uses a normal relational data model in a Postgres that can run on a different host/cluster.
 
-Embedded KV store can be potentially more compact and faster, but electrs stores the actual block data, while rust-bitcoin-indexer extracts only the data it needs and throws everything else away. Missing data could be retro-fitted from the blockchain if needed, by adding more columns and writting small program to reindex and back-fill it.
+Embedded KV store can be potentially more compact and faster, but electrs stores the actual block data, while rust-verge-indexer extracts only the data it needs and throws everything else away. Missing data could be retro-fitted from the blockchain if needed, by adding more columns and writting small program to reindex and back-fill it.
 
 Using relational database will allow you to execute ad-hoc queries and potentially share the db with other applications, without building a separate interface. You can add and remove indices according to your needs.
 
-rust-bitcoin-indexer was designed to have a good idempotent and reliable events streaming/subscription data model. 
+rust-verge-indexer was designed to have a good idempotent and reliable events streaming/subscription data model. 
 
-Electrs is used for practical purposes, rust-bitcoin-indexer (at least right now) is just a neat experiment that gave good results and seems to be working quite well.
+Electrs is used for practical purposes, rust-verge-indexer (at least right now) is just a neat experiment that gave good results and seems to be working quite well.
 
 ## Running
 
 Install Rust with https://rustup.rs
 
 
-### Bitcoind node
+### Verged node
 
-Setup Bitcoind full node, with a config similiar to this:
+Setup Verged full node, with a config similiar to this:
 
 ```
 # [core]
@@ -81,17 +81,17 @@ Setup Postgresql DB, with a db and user:pass that can access it. Example:
 
 ```
 sudo su postgres
-export PGPASSWORD=bitcoin-indexer
-createuser bitcoin-indexer
-createdb bitcoin-indexer bitcoin-indexer
+export PGPASSWORD=verge-indexer
+createuser verge-indexer
+createdb verge-indexer verge-indexer
 ```
 
 ### `.env` file
 
-Setup `.env` file with Postgresql and Bitcoin Core connection data. Example:
+Setup `.env` file with Postgresql and Verge Core connection data. Example:
 
 ```
-DATABASE_URL=postgres://bitcoin-indexer:bitcoin-indexer@localhost/bitcoin-indexer
+DATABASE_URL=postgres://verge-indexer:verge-indexer@localhost/verge-indexer
 NODE_RPC_URL=http://someuser:somepassword@localhost:18443
 ```
 
@@ -135,7 +135,7 @@ about inserting around billion records into 3 tables each.
 For reference -  on my system, I get around 30k txs indexed per second:
 
 ```
-[2019-05-24T05:20:29Z INFO  bitcoin_indexer::db::pg] Block 194369H fully indexed and commited; 99block/s; 30231tx/s
+[2019-05-24T05:20:29Z INFO  verge_indexer::db::pg] Block 194369H fully indexed and commited; 99block/s; 30231tx/s
 ```
 
 which leads to around 5 hours initial blockchain indexing time (current block height is around 577k)...
@@ -148,7 +148,7 @@ I suggest using `tx/s` metric to estimate completion.
 Now everything should be ready. Compile and run with:
 
 ```
-cargo run --release --bin bitcoin-indexer
+cargo run --release --bin verge-indexer
 ```
 
 After the initial full sync, you can also start mempool indexer:
@@ -163,7 +163,7 @@ in a directory containing the `.env` file.
 
 You can use `--wipe-whole-db` to wipe the db. (to be removed in the future)
 
-For logging set env. var. `RUST_LOG` to `bitcoin_indexer=info` or refer to https://docs.rs/env_logger/0.6.0/env_logger/.
+For logging set env. var. `RUST_LOG` to `verge_indexer=info` or refer to https://docs.rs/env_logger/0.6.0/env_logger/.
 
 
 ### Some useful stuff that can be done already
@@ -171,7 +171,7 @@ For logging set env. var. `RUST_LOG` to `bitcoin_indexer=info` or refer to https
 Check current balance of an address:
 
 ```
-bitcoin-indexer=> select * from address_balances where address = '14zV5ZCqYmgyCzoVEhRVsP7SpUDVsCBz5g';                                                                                                                                          
+verge-indexer=> select * from address_balances where address = '14zV5ZCqYmgyCzoVEhRVsP7SpUDVsCBz5g';                                                                                                                                          
               address               |   value
 ------------------------------------+------------
  14zV5ZCqYmgyCzoVEhRVsP7SpUDVsCBz5g | 6138945213
@@ -180,7 +180,7 @@ bitcoin-indexer=> select * from address_balances where address = '14zV5ZCqYmgyCz
 Check balances at a given height:
 
 ```
-bitcoin-indexer=> select * from address_balances_at_height WHERE address IN ('14zV5ZCqYmgyCzoVEhRVsP7SpUDVsCBz5g', '344tcgkKA97LpgzGtAprtqnNRDfo4VQQWT') AND height = 559834;
+verge-indexer=> select * from address_balances_at_height WHERE address IN ('14zV5ZCqYmgyCzoVEhRVsP7SpUDVsCBz5g', '344tcgkKA97LpgzGtAprtqnNRDfo4VQQWT') AND height = 559834;
               address               | height |   value   
 ------------------------------------+--------+-----------
  14zV5ZCqYmgyCzoVEhRVsP7SpUDVsCBz5g | 559834 | 162209091
@@ -190,7 +190,7 @@ bitcoin-indexer=> select * from address_balances_at_height WHERE address IN ('14
 Check txes pending in the mempool:
 
 ```
-bitcoin-indexer=> select * from tx_in_mempool order by (fee/weight) desc limit 5;
+verge-indexer=> select * from tx_in_mempool order by (fee/weight) desc limit 5;
               hash_id               |             hash_rest              | size | weight |  fee   | locktime | coinbase |                                hash                                |             ts
 ------------------------------------+------------------------------------+------+--------+--------+----------+----------+--------------------------------------------------------------------+----------------------------
  \x5d094cc3e4d9a1ec2d280aa9204ff8e4 | \xf0e960ddfed324880dac6e8ab54544c6 |  191 |    764 | 562871 |   577816 | f        | \xc64445b58a6eac0d8824d3fedd60e9f0e4f84f20a90a282deca1d9e4c34c095d | 2019-05-26 05:31:08.658908
@@ -205,6 +205,6 @@ and many more. Refer to `./src/db/pg/*.sql` files for good overview of the schem
 
 # Support
 
-If you like and/or use this project, you can pay for it by sending Bitcoin to
-[33A9SwFHWEnwmFfgRfHu1GvSfCeDcABx93](bitcoin:33A9SwFHWEnwmFfgRfHu1GvSfCeDcABx93).
+If you like and/or use this project, you can pay for it by sending Verge to
+[33A9SwFHWEnwmFfgRfHu1GvSfCeDcABx93](verge:33A9SwFHWEnwmFfgRfHu1GvSfCeDcABx93).
 

@@ -1,17 +1,17 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 
-use bitcoin_hashes::{hex::FromHex, sha256d::Hash as Sha256dHash};
-use bitcoincore_rpc::RpcApi;
+use verge_hashes::{hex::FromHex, sha256d::Hash as Sha256dHash};
+use vergecore_rpc::RpcApi;
 
-fn get_rpc() -> bitcoincore_rpc::Client {
-    bitcoincore_rpc::Client::new(
-        "http://localhost:8332".into(),
-        bitcoincore_rpc::Auth::UserPass("user".into(), "magicpassword".into()),
+fn get_rpc() -> vergecore_rpc::Client {
+    vergecore_rpc::Client::new(
+        "http://localhost:20102".into(),
+        vergecore_rpc::Auth::UserPass("user".into(), "magicpassword".into()),
     )
     .expect("rpc client creation")
 }
 
-const BLOCK_HASH: &str = "00000000000000000013e7c4a60f1aa0e07ed1efb08accbe684602f7bdc7385f";
+const BLOCK_HASH: &str = "656f93a73870b4d974c20cf7d43de4fd6cc02bf9b7693fb967bcb3da6becb4bb";
 
 fn get_block(c: &mut Criterion) {
     c.bench_function("getblock", |b| {
@@ -29,7 +29,7 @@ fn get_block(c: &mut Criterion) {
     c.bench_function("getrawtransaction", |b| {
         let rpc = get_rpc();
         let hash = Sha256dHash::from_hex(
-            "45c105fadfac138711b3312044abd32cddedf7ef2cf466f10d93b5e83dba3ada",
+            "55d34392ca0bacb471ea57d7d5eabcdb0fcaaa6d611cbf8586f35c2e45d3da7c",
         )
         .unwrap();
 

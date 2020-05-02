@@ -3,7 +3,7 @@ use log::{debug, info, trace};
 use crate::{
     prelude::*, BlockHeight, Rpc, RpcBlock, RpcBlockWithPrevId, Sha256dHash, WithHeightAndId,
 };
-use bitcoincore_rpc::RpcApi;
+use vergecore_rpc::RpcApi;
 use common_failures::prelude::*;
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap},
@@ -33,8 +33,8 @@ fn retry<T>(mut f: impl FnMut() -> Result<T>) -> T {
     }
 }
 
-impl Rpc for bitcoincore_rpc::Client {
-    type Data = Box<bitcoin::Block>;
+impl Rpc for vergecore_rpc::Client {
+    type Data = Box<verge::Block>;
     type Id = Sha256dHash;
     const RECOMMENDED_HEAD_RETRY_DELAY_MS: u64 = 2000;
     const RECOMMENDED_ERROR_RETRY_DELAY_MS: u64 = 100;
@@ -57,7 +57,7 @@ impl Rpc for bitcoincore_rpc::Client {
     }
 
     fn get_block_by_id(&self, hash: &Self::Id) -> Result<Option<(Self::Data, Self::Id)>> {
-        let block: Box<bitcoin::Block> = match self.get_by_id(hash) {
+        let block: Box<verge::Block> = match self.get_by_id(hash) {
             Err(e) => {
                 if e.to_string().contains("Block height out of range") {
                     return Ok(None);
@@ -134,7 +134,7 @@ where
             info!("Starting block fetcher starting at {}H", h + 1);
             h + 1
         } else {
-            info!("Starting block fetcher starting at genesis block");
+            info!("Starting block fetcher from genesis block forward...");
             0
         };
 
@@ -235,8 +235,8 @@ where
         }
         self.prev_hashes
             .insert(block.block.height, block.block.id.clone());
-        // this is how big reorgs we're going to detect
-        let window_size = 1000;
+        // 5000 is how big reorgs we're going to detect
+        let window_size = 5000;
         if self.cur_height >= window_size {
             self.prev_hashes.remove(&(self.cur_height - window_size));
         }

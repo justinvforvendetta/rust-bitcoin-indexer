@@ -1,10 +1,10 @@
-//! Postgres bitcoin blockchain
+//! Postgres verge blockchain
 //!
 //! ## Why is this code so big & complex?
 //!
 //! ### Performance
 //!
-//! Initiall indexing of the whole Bitcoin history can take a lot of time.
+//! Initiall indexing of the whole Verge history can take a lot of time.
 //! For the indexer to be practical initial sync needs to be fast.. That's why all the
 //! tricks possible are used:
 //!
@@ -75,19 +75,19 @@ pub fn establish_connection(url: &str) -> pg::Connection {
 
 fn calculate_tx_id_with_workarounds(
     block: &BlockData,
-    tx: &bitcoin::blockdata::transaction::Transaction,
-    network: bitcoin::Network,
+    tx: &verge::blockdata::transaction::Transaction,
+    network: verge::Network,
 ) -> Sha256dHash {
     let is_coinbase = tx.is_coin_base();
-    if network != bitcoin::Network::Bitcoin {
+    if network != verge::Network::Verge {
         tx.txid()
     } else if block.height == 91842 && is_coinbase {
         // d5d27987d2a3dfc724e359870c6644b40e497bdc0589a033220fe15429d88599
         // e3bf3d07d4b0375638d5f1db5255fe07ba2c4cb067cd81b84ee974b6585fb469
         //
         // are twice in the blockchain; eg.
-        // https://blockchair.com/bitcoin/block/91812
-        // https://blockchair.com/bitcoin/block/91842
+        // https://blockchair.com/verge/block/91812
+        // https://blockchair.com/verge/block/91842
         // to make the unique indexes happy, we just add one to last byte
 
         TxHash::from_hex("d5d27987d2a3dfc724e359870c6644b40e497bdc0589a033220fe15429d885a0")
@@ -235,11 +235,11 @@ impl<'a> Drop for MultiValueSqlFormatter<'a> {
 
 struct OutputFormatter<'a> {
     output: MultiValueSqlFormatter<'a>,
-    network: bitcoin::Network,
+    network: verge::Network,
 }
 
 impl<'a> OutputFormatter<'a> {
-    fn new(output_s: &'a mut String, mode: Mode, network: bitcoin::Network) -> Self {
+    fn new(output_s: &'a mut String, mode: Mode, network: verge::Network) -> Self {
         Self {
             output: MultiValueSqlFormatter::new_on_conflict_do_nothing_auto(
                 output_s,
@@ -250,7 +250,7 @@ impl<'a> OutputFormatter<'a> {
         }
     }
 
-    fn fmt(&mut self, tx_id: &Sha256dHash, output: &bitcoin::TxOut, vout: u32) {
+    fn fmt(&mut self, tx_id: &Sha256dHash, output: &verge::TxOut, vout: u32) {
         let network = self.network;
         self.output.fmt_with(|s| {
             s.write_str("('\\x").unwrap();
@@ -259,7 +259,7 @@ impl<'a> OutputFormatter<'a> {
                 "'::bytea,{},{},{})",
                 vout,
                 output.value,
-                crate::util::bitcoin::address_from_script(&output.script_pubkey, network)
+                crate::util::verge::address_from_script(&output.script_pubkey, network)
                     .map(|a| format!("'{}'", a))
                     .unwrap_or_else(|| "NULL".into())
             ))
@@ -283,7 +283,7 @@ impl<'a> InputFormatter<'a> {
         }
     }
 
-    fn fmt(&mut self, tx_id: &Sha256dHash, input: &bitcoin::TxIn) {
+    fn fmt(&mut self, tx_id: &Sha256dHash, input: &verge::TxIn) {
         self.input.fmt_with(move |s| {
             s.write_str("('\\x").unwrap();
             write_hash_id_hex(s, &input.previous_output.txid).unwrap();
@@ -339,7 +339,7 @@ impl<'a> TxFormatter<'a> {
         output_s: &'a mut String,
         input_s: &'a mut String,
         mode: Mode,
-        network: bitcoin::Network,
+        network: verge::Network,
         inputs_utxo_map: UtxoDetailsMap,
     ) -> Self {
         Self {
@@ -365,7 +365,7 @@ impl<'a> TxFormatter<'a> {
         tx_s: &'a mut String,
         output_s: &'a mut String,
         input_s: &'a mut String,
-        network: bitcoin::Network,
+        network: verge::Network,
         inputs_utxo_map: UtxoDetailsMap,
     ) -> Self {
         // We can only do mempool insert in the normal mode, because otherwise bulk
@@ -387,7 +387,7 @@ impl<'a> TxFormatter<'a> {
     fn fmt_one(
         &mut self,
         block_height: Option<BlockHeight>,
-        tx: &bitcoin::Transaction,
+        tx: &verge::Transaction,
         tx_id: &Sha256dHash,
         fee: u64,
     ) {
@@ -421,7 +421,7 @@ impl<'a> TxFormatter<'a> {
     fn fmt(
         &mut self,
         block_height: Option<BlockHeight>,
-        tx: &bitcoin::Transaction,
+        tx: &verge::Transaction,
         tx_id: &TxHash,
     ) {
         let is_coinbase = tx.is_coin_base();
@@ -473,7 +473,7 @@ impl<'a> BlockFormatter<'a> {
         output_s: &'a mut String,
         input_s: &'a mut String,
         mode: Mode,
-        network: bitcoin::Network,
+        network: verge::Network,
         inputs_utxo_map: UtxoDetailsMap,
         tx_ids: TxIdMap,
     ) -> Self {
@@ -620,8 +620,8 @@ impl HashIdOutPoint {
     }
 }
 
-impl From<bitcoin::OutPoint> for HashIdOutPoint {
-    fn from(p: bitcoin::OutPoint) -> Self {
+impl From<verge::OutPoint> for HashIdOutPoint {
+    fn from(p: verge::OutPoint) -> Self {
         Self {
             tx_hash_id: hash_to_hash_id(&p.txid),
             vout: p.vout,
@@ -706,7 +706,7 @@ impl UtxoSetCache {
     /// * Vector of outputs that were missing from the set
     fn consume_spent_utxos(
         &mut self,
-        outputs: impl Iterator<Item = bitcoin::OutPoint>,
+        outputs: impl Iterator<Item = verge::OutPoint>,
     ) -> (UtxoDetailsMap, Vec<HashIdOutPoint>) {
         let mut found = HashMap::default();
         let mut missing = vec![];
@@ -879,7 +879,7 @@ type TxIdMap = HashMap<(BlockHeight, usize), BlockHash>;
 
 fn tx_id_map_from_blocks(
     blocks: &[crate::BlockData],
-    network: bitcoin::Network,
+    network: verge::Network,
 ) -> Result<TxIdMap> {
     trace_time(
         || {
@@ -917,7 +917,7 @@ fn fmt_insert_blockdata_sql(
     inputs_utxo_map: UtxoDetailsMap,
     tx_ids: TxIdMap,
     mode: Mode,
-    network: bitcoin::Network,
+    network: verge::Network,
 ) -> Result<Vec<String>> {
     let mut event_q = String::new();
     let mut block_q = String::new();
@@ -957,7 +957,7 @@ impl AsyncBlockInsertWorker {
         url: String,
         in_flight: Arc<Mutex<BlocksInFlight>>,
         mode: Mode,
-        network: bitcoin::Network,
+        network: verge::Network,
     ) -> Self {
         // We use only rendezvous (0-size) channels, to allow passing
         // work and parallelism, but without doing any buffering of
@@ -1107,7 +1107,7 @@ pub struct IndexerStore {
     batch_txs_total: u64,
     batch_id: u64,
     mode: Mode,
-    network: bitcoin::Network,
+    network: verge::Network,
     node_chain_head_height: BlockHeight,
 
     // blocks that were sent to workers, but
@@ -1132,7 +1132,7 @@ impl IndexerStore {
     pub fn new(
         url: String,
         node_chain_head_height: BlockHeight,
-        network: bitcoin::Network,
+        network: verge::Network,
     ) -> Result<Self> {
         let connection = establish_connection(&url);
         Self::init(&connection)?;
@@ -1747,11 +1747,11 @@ impl crate::event_source::EventSource for postgres::Connection {
 pub struct MempoolStore {
     #[allow(unused)]
     connection: pg::Connection,
-    network: bitcoin::Network,
+    network: verge::Network,
 }
 
 impl MempoolStore {
-    pub fn new(url: String, network: bitcoin::Network) -> Result<Self> {
+    pub fn new(url: String, network: verge::Network) -> Result<Self> {
         let connection = establish_connection(&url);
         IndexerStore::init(&connection)?;
 
@@ -1770,7 +1770,7 @@ impl MempoolStore {
     fn insert_tx_data(
         &mut self,
         tx_id: &TxHash,
-        tx: &bitcoin::Transaction,
+        tx: &verge::Transaction,
         utxo_map: UtxoDetailsMap,
     ) -> Result<()> {
         let mut tx_q = String::new();
@@ -1800,7 +1800,7 @@ impl MempoolStore {
 impl super::MempoolStore for MempoolStore {
     fn insert_iter<'a>(
         &mut self,
-        txs: impl Iterator<Item = &'a WithHash<Option<bitcoin::Transaction>>>,
+        txs: impl Iterator<Item = &'a WithHash<Option<verge::Transaction>>>,
     ) -> Result<()> {
         // maybe one day we can optimize, right now just loop
         for tx in txs {
@@ -1809,7 +1809,7 @@ impl super::MempoolStore for MempoolStore {
         Ok(())
     }
 
-    fn insert(&mut self, tx: &WithHash<Option<bitcoin::Transaction>>) -> Result<()> {
+    fn insert(&mut self, tx: &WithHash<Option<verge::Transaction>>) -> Result<()> {
         let tx_id = tx.id;
 
         if let Some(ref tx) = tx.data {

@@ -1,9 +1,9 @@
 #![allow(unused)] // need some cleanup
 
-use bitcoin_indexer::{
+use verge_indexer::{
     db, node::prefetcher, opts, prelude::*, types::*, util::BottleCheck, RpcInfo,
 };
-use bitcoincore_rpc::RpcApi;
+use vergecore_rpc::RpcApi;
 use log::info;
 use std::{env, sync::Arc};
 
@@ -11,19 +11,19 @@ use common_failures::{prelude::*, quick_main};
 
 struct Indexer {
     node_starting_chainhead_height: BlockHeight,
-    rpc: Arc<bitcoincore_rpc::Client>,
+    rpc: Arc<vergecore_rpc::Client>,
     db: Box<dyn db::IndexerStore>,
     bottlecheck_db: BottleCheck,
 }
 
 impl Indexer {
     fn new(config: Config) -> Result<Self> {
-        let rpc_info = bitcoin_indexer::RpcInfo::from_url(&config.node_url)?;
+        let rpc_info = verge_indexer::RpcInfo::from_url(&config.node_url)?;
         let rpc = rpc_info.to_rpc_client()?;
         let rpc = Arc::new(rpc);
         let node_starting_chainhead_height = rpc.get_block_count()? as BlockHeight;
         let network =
-            bitcoin_indexer::util::bitcoin::network_from_str(&rpc.get_blockchain_info()?.chain)?;
+            verge_indexer::util::verge::network_from_str(&rpc.get_blockchain_info()?.chain)?;
         let mut db =
             db::pg::IndexerStore::new(config.db_url, node_starting_chainhead_height, network)?;
         info!("Node chain-head at {}H", node_starting_chainhead_height);
