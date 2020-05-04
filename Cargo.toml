@@ -12,12 +12,8 @@ homepage = "https://github.com/justinvforvendetta/rust-verge-indexer"
 repository = "https://github.com/justinvforvendeta/rust-verge-indexer"
 readme = "README.md"
 
-[[bench]]
-harness = false
-name = "rust-vergecore_rpc"
-
 [dependencies]
-verge = "6.0.2"
+bitcoin = "0.18.0"
 bitcoin-bech32 = "*"
 bitcoin_hashes = "0.3"
 rust-vergecore-rpc = { version = "0.6", branch = "more-calls", git="https://github.com/justinvforvendetta/rust-vergecore-rpc" }
