@@ -94,7 +94,7 @@ Setup `.env` file with Postgresql and Verge Core connection data. Example:
 
 ```
 DATABASE_URL=postgres://verge-indexer:verge-indexer@localhost/verge-indexer
-NODE_RPC_URL=http://someuser:somepassword@localhost:18443
+NODE_RPC_URL=http://someuser:somepassword@localhost:20102
 ```
 
 #### Optimize DB performance for massive amount of inserts!
