@@ -1,7 +1,7 @@
 [package]
 authors = ["Dawid Ciężarkiewicz <dpc@dpc.pw>"]
 edition = "2018"
-name = "rust-verge-indexer"
+name = "verge-indexer"
 version = "0.1.0"
 description = "Powerful & Versatile Verge Indexer"
 keywords = ["verge", "indexer", "database", "cryptocurrency"]
