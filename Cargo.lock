@@ -162,12 +162,12 @@ dependencies = [
 [[package]]
 name = "bitcoincore-rpc"
 version = "0.6.0"
-source = "git+https://github.com/dpc/rust-bitcoincore-rpc?branch=more-calls#7c9684f4e40bf578d769295fd1a4e942c79d02ae"
+source = "git+https://github.com/justinvforvendetta/rust-vergecore-rpc?branch=more-calls"
 dependencies = [
  "bitcoin 0.18.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bitcoin-amount 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "bitcoin_hashes 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "bitcoincore-rpc-json 0.6.0 (git+https://github.com/dpc/rust-bitcoincore-rpc?branch=more-calls)",
+ "vergecore-rpc-json 0.6.0 (git+https://github.com/justinvforvendetta/rust-vergecore-rpc?branch=more-calls)",
  "hex 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "jsonrpc 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
