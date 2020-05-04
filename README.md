@@ -75,11 +75,13 @@ walletbroadcast=0
 
 The only important part here is being able to access JSON-RPC interface.
 
-### Postgresql
+### Postgresql (Ubuntu 20.04)
 
 Setup Postgresql DB, with a db and user:pass that can access it. Example:
 
 ```
+sudo apt update
+sudo apt install postgresql postgresql-contrib
 sudo su postgres
 export PGPASSWORD=verge-indexer
 createuser verge-indexer
